@@ -1,12 +1,23 @@
-import { Column } from 'typeorm';
+import { CreateDateColumn, DeleteDateColumn, UpdateDateColumn } from 'typeorm';
 
-export class CommonEntity {
-  @Column({ name: 'created_at' })
+export abstract class CommonEntity {
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'datetime',
+  })
   createdAt: Date;
 
-  @Column({ name: 'updated_at', nullable: true })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    nullable: true,
+    type: 'datetime',
+  })
   updatedAt: Date;
 
-  @Column({ name: 'deleted_at', nullable: true })
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    nullable: true,
+    type: 'datetime',
+  })
   deletedAt: Date;
 }
