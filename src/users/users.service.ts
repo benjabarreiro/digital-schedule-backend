@@ -1,17 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Connection, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UserHealthInsurance } from 'src/user-health-insurances/entities/user-health-insurance.entity';
 import { HealthInsurance } from 'src/health-insurances/entities/health-insurance.entity';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class UsersService {
   private userRepository: Repository<User>;
   private healthInsuranceRepository: Repository<HealthInsurance>;
   private userHealthInsuranceRepository: Repository<UserHealthInsurance>;
-  constructor(private readonly connection: Connection) {
+  constructor(
+    private readonly connection: Connection,
+    private readonly authService: AuthService,
+  ) {
     this.userRepository = this.connection.getRepository(User);
     this.userHealthInsuranceRepository =
       this.connection.getRepository(UserHealthInsurance);
@@ -49,7 +53,28 @@ export class UsersService {
     } catch (err) {
       throw err;
     }
-    return 'This action adds a new user';
+  }
+
+  async findOneByEmail({ email, password }) {
+    try {
+      const user = await this.userRepository.findOneBy({ email });
+
+      const invalidCredentials = !this.authService.validateCredentials(
+        user?.password,
+        password,
+      );
+
+      if (!user || invalidCredentials) {
+        throw new HttpException('Invalid credentials', HttpStatus.FORBIDDEN);
+      }
+      const jwt = await this.authService.generateToken({ id: user.id });
+      return {
+        ...user,
+        jwt,
+      };
+    } catch (err) {
+      throw err;
+    }
   }
 
   findAll() {
