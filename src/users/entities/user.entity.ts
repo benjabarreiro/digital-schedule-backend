@@ -53,6 +53,7 @@ export class User extends CommonEntity {
   @OneToMany(
     () => UserHealthInsurance,
     (healthInsurance) => healthInsurance.user,
+    { eager: true },
   )
   healthInsurances: UserHealthInsurance[];
 

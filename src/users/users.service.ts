@@ -31,7 +31,7 @@ export class UsersService {
         lastName: createUserDto.lastName,
       });
 
-      await this.userRepository.save(user);
+      const newUser = await this.userRepository.save(user);
 
       if (createUserDto.healthInsurances?.length) {
         const healthInsurances = await this.healthInsuranceRepository.findByIds(
@@ -47,9 +47,8 @@ export class UsersService {
         );
 
         await this.userHealthInsuranceRepository.save(userHealthInsurances);
-
-        return 'user created correctly';
       }
+      return newUser;
     } catch (err) {
       throw err;
     }
@@ -81,8 +80,8 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    return await this.userRepository.findOne({ where: { id } });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

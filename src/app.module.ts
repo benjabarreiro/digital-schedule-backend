@@ -72,6 +72,7 @@ const Entities = [
         database: configService.get<string>('DB_NAME'),
         entities: Entities,
         synchronize: true,
+        //dropSchema: true,
         migrations: [__dirname + '/../migrations/*{.ts,.js}'],
         migrationsRun: true, // Automatically run migrations on app startup
         cli: {

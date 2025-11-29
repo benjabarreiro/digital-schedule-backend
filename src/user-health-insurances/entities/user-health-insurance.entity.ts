@@ -17,7 +17,7 @@ export class UserHealthInsurance extends CommonEntity {
   @ManyToOne(
     () => HealthInsurance,
     (healthInsurance) => healthInsurance.users,
-    { onDelete: 'CASCADE' },
+    { onDelete: 'CASCADE', eager: true },
   )
   @JoinColumn({ name: 'health_insurance_id' })
   healthInsurance: HealthInsurance;
