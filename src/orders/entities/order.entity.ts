@@ -13,14 +13,8 @@ export class Order extends CommonEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'payment_processor_id', unique: true })
-  paymentProcessorId: string;
-
   @Column()
   status: string;
-
-  @Column({ name: 'payment_date' })
-  paymentDate: Date;
 
   @Column()
   amount: number;

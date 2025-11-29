@@ -23,8 +23,8 @@ export class PlansService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} plan`;
+  async findOne(id: number) {
+    return await this.plansRepository.findOne({ where: { id } });
   }
 
   update(id: number, updatePlanDto: UpdatePlanDto) {
