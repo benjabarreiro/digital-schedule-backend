@@ -23,7 +23,7 @@ export class Subscription extends CommonEntity {
   @Column({ name: 'end_date', nullable: true, type: 'timestamp' })
   endDate: Date;
 
-  @Column({ name: 'renewal_date', type: 'timestamp' })
+  @Column({ name: 'renewal_date', type: 'timestamp', default: null })
   renewalDate: Date;
 
   @Column()
