@@ -8,6 +8,7 @@ import { Connection, Repository } from 'typeorm';
 import { Subscription } from './entities/subscription.entity';
 import { OrdersService } from 'src/orders/orders.service';
 import { PreApproval, MercadoPagoConfig } from 'mercadopago';
+import { formatInTimeZone } from 'date-fns-tz';
 
 @Injectable()
 export class SubscriptionsService {
@@ -65,7 +66,6 @@ export class SubscriptionsService {
 
       const newSubscription = this.subcriptionsRepository.create({
         startDate: new Date(),
-        renewalDate: subscription.next_payment_date,
         paymentProcessorSubscriptionId: subscription.id,
         status: 'pending',
         user,
@@ -101,8 +101,6 @@ export class SubscriptionsService {
 
       const { status, id: externalSubscriptionId, next_payment_date } = data;
 
-      console.log(status, id, externalSubscriptionId);
-
       if (status === 'authorized') {
         const subscription = await this.subcriptionsRepository.findOneBy({
           paymentProcessorSubscriptionId: externalSubscriptionId,
@@ -112,15 +110,37 @@ export class SubscriptionsService {
           return;
         }
 
-        console.log('paymentProcessorSubscriptionId', externalSubscriptionId);
-        console.log('paymentProcessorOrderId', id);
-        console.log('data', paymentProcessorDto, data);
-
         const order = await this.ordersService.findLatestBySubscriptionId(
           subscription.id,
         );
 
-        if (!order) {
+        const mpDate = new Date(next_payment_date || '');
+        const ARG_TIMEZONE = 'America/Argentina/Buenos_Aires';
+        const dbLocalDate = subscription.renewalDate
+          ? formatInTimeZone(
+              subscription.renewalDate,
+              ARG_TIMEZONE,
+              'yyyy-MM-dd HH:mm:ss',
+            )
+          : '';
+        const mpLocalDate = formatInTimeZone(
+          mpDate,
+          ARG_TIMEZONE,
+          'yyyy-MM-dd HH:mm:ss',
+        );
+
+        if (!subscription.renewalDate && order) {
+          await this.ordersService.update(order.id, {
+            status: 'paid',
+          });
+
+          await this.subcriptionsRepository.update(subscription?.id, {
+            renewalDate: next_payment_date,
+            status: 'active',
+          });
+        }
+
+        if (mpLocalDate !== dbLocalDate && subscription.renewalDate) {
           await this.ordersService.create({
             status: 'paid',
             amount: subscription.plan.price,
@@ -128,14 +148,12 @@ export class SubscriptionsService {
             planName: subscription.plan.name,
             subscription: subscription,
           });
-        } else {
-          await this.ordersService.update(order.id, { status: 'paid' });
-        }
 
-        await this.subcriptionsRepository.update(subscription?.id, {
-          renewalDate: next_payment_date,
-          status: 'active',
-        });
+          await this.subcriptionsRepository.update(subscription?.id, {
+            renewalDate: next_payment_date,
+            status: 'active',
+          });
+        }
       } else if (status === 'cancelled') {
         const subscription = await this.subcriptionsRepository.findOneBy({
           paymentProcessorSubscriptionId: externalSubscriptionId,
@@ -157,7 +175,6 @@ export class SubscriptionsService {
         });
       }
     } catch (err) {
-      console.log('err', err);
       throw err;
     }
   }

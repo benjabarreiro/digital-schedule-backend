@@ -35,7 +35,6 @@ export class OrdersService {
     const order = await this.ordersRepository.findOne({
       where: {
         subscription: { id: subscriptionId },
-        status: 'pending',
       },
       order: { createdAt: 'DESC' },
     });
