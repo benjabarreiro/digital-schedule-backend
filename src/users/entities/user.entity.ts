@@ -1,3 +1,4 @@
+import { Subscription } from 'src/subscriptions/entities/subscription.entity';
 import { CommonEntity } from '../../entities/common.entity';
 import { UserBusinessRole } from '../../user-business-roles/entities/user-business-role.entity';
 import { UserHealthInsurance } from '../../user-health-insurances/entities/user-health-insurance.entity';
@@ -59,4 +60,9 @@ export class User extends CommonEntity {
 
   @OneToMany(() => UserBusinessRole, (businessRoles) => businessRoles.user)
   businessRoles: UserBusinessRole[];
+
+  @OneToMany(() => Subscription, (subscriptions) => subscriptions.user, {
+    eager: true,
+  })
+  subscriptions: Subscription[];
 }
