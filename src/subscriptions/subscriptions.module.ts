@@ -9,5 +9,6 @@ import { OrdersModule } from 'src/orders/orders.module';
   imports: [PlansModule, UsersModule, OrdersModule],
   controllers: [SubscriptionsController],
   providers: [SubscriptionsService],
+  exports: [SubscriptionsService],
 })
 export class SubscriptionsModule {}
