@@ -1,3 +1,4 @@
+import { Order } from 'src/orders/entities/order.entity';
 import { CommonEntity } from '../../entities/common.entity';
 import { Plan } from '../../plans/entities/plan.entity';
 import { User } from '../../users/entities/user.entity';
@@ -6,6 +7,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -36,4 +38,7 @@ export class Subscription extends CommonEntity {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToMany(() => Order, (order) => order.subscription, { eager: true })
+  orders: Order[];
 }

@@ -64,7 +64,7 @@ export class SubscriptionsService {
         },
       );
 
-      const newSubscription = this.subcriptionsRepository.create({
+      const newSubscription = await this.subcriptionsRepository.create({
         startDate: new Date(),
         paymentProcessorSubscriptionId: subscription.id,
         status: 'pending',
@@ -183,8 +183,10 @@ export class SubscriptionsService {
     return `This action returns all subscriptions`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} subscription`;
+  async findOne(id: number) {
+    try {
+      return await this.subcriptionsRepository.findOne({ where: { id } });
+    } catch (err) {}
   }
 
   update(id: number, updateSubscriptionDto: UpdateSubscriptionDto) {
